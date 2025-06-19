@@ -34,19 +34,25 @@ if (!$reserve) {
 }
 
 $payment = $reserve['PAYMENT'];
-$flight_date = substr($departureDateTime, 0, 10);
-$today = date('Y-m-d');
-$diff = (int)((strtotime($flight_date) - strtotime($today)) / 86400);
+$flight_date = substr($departureDateTime, 0, 10); // 'YYYY-MM-DD'
+$today = date('Y-m-d'); // 'YYYY-MM-DD'
 
-// 2. 위약금 계산
-if ($diff > 15) {
-    $penalty = 150000;
-} elseif ($diff >= 4) {
-    $penalty = 180000;
-} elseif ($diff >= 1) {
-    $penalty = 250000;
+if ($flight_date === $today) {
+    // 출발일과 취소일이 같으면 당일 취소 → 전액 위약금
+    $penalty = $payment;
 } else {
-    $penalty = $payment; // 당일: 전액
+    // 날짜 차이(며칠 전인지) 계산
+    $diff = (int)((strtotime($flight_date) - strtotime($today)) / 86400);
+
+    if ($diff > 15) {
+        $penalty = 150000;
+    } elseif ($diff >= 4) {
+        $penalty = 180000;
+    } elseif ($diff >= 1) {
+        $penalty = 250000;
+    } else {
+        $penalty = $payment; // 혹시라도 예외적으로 당일이 아닌데 0 이하가 나오면 전액
+    }
 }
 $refund = max(0, $payment - $penalty);
 
