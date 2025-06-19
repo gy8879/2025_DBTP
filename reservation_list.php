@@ -14,7 +14,9 @@ $type = $_GET['type'] ?? 'all'; // all, reserve, cancel
 
 // 예약 내역 조회
 $reserve_sql = "
-SELECT r.*, a.airline, a.departureAirport, a.arrivalAirport, a.departureDateTime AS flight_departure, a.arrivalDateTime AS flight_arrival
+SELECT r.*, a.airline, a.departureAirport, a.arrivalAirport, 
+       TO_CHAR(a.departureDateTime, 'YYYY-MM-DD HH24:MI:SS') AS flight_departure, 
+       a.arrivalDateTime AS flight_arrival
 FROM RESERVE r
 JOIN AIRPLAIN a ON r.flightNo = a.flightNo AND r.departureDateTime = a.departureDateTime
 WHERE r.cno = :cno
@@ -120,7 +122,7 @@ function format_time($datetime_str) {
                 echo '<td>';
                 echo '<form action="cancel_reserve.php" method="post" style="margin:0;">';
                 echo '<input type="hidden" name="flightNo" value="' . htmlspecialchars($row['FLIGHTNO']) . '">' ;
-                echo '<input type="hidden" name="departureDateTime" value="' . date('Y-m-d H:i:s', strtotime($row['FLIGHT_DEPARTURE'])) . '">';
+                echo '<input type="hidden" name="departureDateTime" value="' . htmlspecialchars($row['FLIGHT_DEPARTURE']) . '">';
                 echo '<input type="hidden" name="seatClass" value="' . htmlspecialchars($row['SEATCLASS']) . '">';
                 echo '<button type="submit" class="btn btn-danger btn-sm">취소</button>';
                 echo '</form>';
